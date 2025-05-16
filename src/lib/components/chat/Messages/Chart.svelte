@@ -88,33 +88,49 @@
         try {
             chartInstance?.setOption(newOption, notMerge, lazyUpdate);
         } catch (e) {
-            dispatch('chatError',{ message: '图表渲染失败', detail: e })
+            dispatch('chartError',{ message: '图表渲染失败', detail: e })
         } 
     };
 
     onMount(() => {
         if (chartContainer) {
+            window.addEventListener('resize', resize);
             chartInstance = echarts.init(chartContainer);
             if(tuple2DData && tuple2DData.length > 0){
                 setOption(getOptionFromTuple2DData(tuple2DData));
             }
-            // window.addEventListener('resize', resize);
         }else{
-            dispatch('chatError')
+            dispatch('chartError')
         }
     });
     
     onDestroy(() => {
-        // window.removeEventListener('resize', resize);
+        window.removeEventListener('resize', resize);
         chartInstance?.dispose();
     });
 </script>
-    <div bind:this={chartContainer} class="chart-container"></div>
+    <div class="chart-scroll">
+        <div bind:this={chartContainer} class="chart-container"></div>
+    </div>
 <style>
+    .chart-scroll {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        background-color: rgba(236, 236, 236, 0.3);
+    }
     .chart-container {
       width: 100%;
+      min-width: 300px;
       /* height: 500px; */
       aspect-ratio: 2;
-      background-color: rgba(236, 236, 236, 0.3);
     }
+    @media (max-width: 900px) {
+        .chart-container {
+            height: 260px;
+            aspect-ratio: auto;
+            min-width: 300px;
+        }
+    }
+
 </style>

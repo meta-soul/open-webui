@@ -355,7 +355,7 @@
 		{#if tuple2DData && tuple2DData.length > 0 && !chartError}
 			<Chart 
 				tuple2DData={tuple2DData}
-				on:chatError={() => {
+				on:chartError={() => {
 					chartError = true
 				}} 
 			/>
