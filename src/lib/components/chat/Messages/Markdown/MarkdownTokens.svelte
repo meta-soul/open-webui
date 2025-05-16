@@ -18,6 +18,7 @@
 	import Collapsible from '$lib/components/common/Collapsible.svelte';
 	import Tooltip from '$lib/components/common/Tooltip.svelte';
 	import ArrowDownTray from '$lib/components/icons/ArrowDownTray.svelte';
+	import Chart from '$lib/components/chat/Messages/Chart.svelte';
 
 	import Source from './Source.svelte';
 	import { settings } from '$lib/stores';
@@ -35,6 +36,9 @@
 
 	export let onTaskClick: Function = () => {};
 	export let onSourceClick: Function = () => {};
+
+	let tuple2DData:Array<any> = [];
+	let chartError:boolean = false;
 
 	const headerComponent = (depth: number) => {
 		return 'h' + depth;
@@ -75,6 +79,37 @@
 		// Use FileSaver.js's saveAs function to save the generated CSV file.
 		saveAs(blob, `table-${id}-${tokenIdx}.csv`);
 	};
+	const isTuple2DData = (text:string) => {
+		try {
+			const jsonLike = text
+			.replace(/\(/g, '[')
+			.replace(/\)/g, ']')
+			.replace(/'/g, '"');
+
+			const parsed = JSON.parse(jsonLike);
+
+			if (!Array.isArray(parsed) || parsed.length === 0) return [];
+
+			const valid = parsed.every(
+				item =>
+					Array.isArray(item) &&
+					item.length === 2 &&
+					(
+						(typeof item[0] === 'string' && typeof item[1] === 'number' && Number.isFinite(item[1])) ||
+						(typeof item[0] === 'number' && Number.isFinite(item[0]) && typeof item[1] === 'number' && Number.isFinite(item[1])) ||
+						(typeof item[0] === 'number' && Number.isFinite(item[0]) && typeof item[1] === 'string')
+					)
+			);
+
+			if (valid) {
+				return parsed
+			}
+			return []
+		} catch (e) {
+			return [];
+		}
+	};
+
 </script>
 
 <!-- {JSON.stringify(tokens)} -->
@@ -314,5 +349,16 @@
 		<div class="my-2" />
 	{:else}
 		{console.log('Unknown token', token)}
+	{/if}
+	<!-- echarts -->
+	{#if (tuple2DData = isTuple2DData(token.text))}
+		{#if tuple2DData && tuple2DData.length > 0 && !chartError}
+			<Chart 
+				tuple2DData={tuple2DData}
+				on:chatError={() => {
+					chartError = true
+				}} 
+			/>
+		{/if}
 	{/if}
 {/each}
