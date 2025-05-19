@@ -7,6 +7,7 @@
 
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
+    const colors = ['#5470C6','#7F55B1','#F79B72','#67AE6E','#F38C79']
 
     export let tuple2DData: Array<any>= [];
 
@@ -46,6 +47,7 @@
             {
                 name: 'Value',
                 type: 'bar',
+                barMaxWidth: 80,
                 data: [],
                 label: {
                     show: true,
@@ -57,9 +59,9 @@
                     borderRadius: [5, 5, 0, 0]
                 },
                 emphasis: {
-                    itemStyle: {
-                        color: '#91cc75'
-                    }
+                    // itemStyle: {
+                    //     color: '#91cc75'
+                    // }
                 },
                 animationDuration: 800,
                 animationEasing: 'bounceOut'
@@ -75,6 +77,17 @@
 
         option.xAxis.data = xData;
         option.series[0].data = yData;
+
+        // 设置随机颜色
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        option.series[0].itemStyle.color = randomColor;
+
+        // 转换为折线图
+        if(tuple2DData.length && tuple2DData.length > 10){
+            option.series[0].type = 'line'
+            option.series[0].label = {}
+            // option.series[0].areaStyle = {}
+        }
 
         return option;
     };
